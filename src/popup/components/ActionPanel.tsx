@@ -171,19 +171,6 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
     });
   }
 
-  async function createSiftFolder() {
-    const name = prompt('Enter folder name (leave blank for today\'s date):');
-    await handleAction('Create Sift folder', async () => {
-      onStatusChange('Creating Sift folder...');
-      const result = await chrome.runtime.sendMessage({
-        type: 'CREATE_SIFT_FOLDER',
-        name: name || undefined,
-      });
-      if (result.error) throw new Error(result.error);
-      onStatusChange(`Created folder: Sift/${result.title}`);
-    });
-  }
-
   async function deleteDeadLinks(bookmarksToDelete: SiftBookmark[]) {
     setShowDeadLinks(false);
     await handleAction('Delete dead links', async () => {
@@ -258,7 +245,7 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
           <button
             class="btn btn-secondary"
             onClick={cancelDeadLinkCheck}
-            style={{ marginTop: '12px', width: '100%' }}
+            style={{ marginTop: '8px', width: '100%' }}
           >
             Cancel Check
           </button>
@@ -339,7 +326,7 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         </button>
       </div>
 
-      <div class="section-header" style={{ marginTop: '24px' }}>
+      <div class="section-header" style={{ marginTop: '16px' }}>
         <span class="section-title">AI Features</span>
       </div>
 
@@ -349,16 +336,12 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
           onClick={categorizeWithAI}
           disabled={loading !== null}
         >
-          {loading === 'AI categorization' ? 'Analyzing...' : 'Suggest Categories (AI)'}
+          {loading === 'AI categorization' ? 'Analyzing...' : 'Restructure Folders & Bookmarks'}
         </button>
-
-        <button
-          class="btn btn-primary"
-          onClick={createSiftFolder}
-          disabled={loading !== null}
-        >
-          {loading === 'Create Sift folder' ? 'Creating...' : 'Create Sift Folder'}
-        </button>
+        <p class="ai-hint">
+          Requires your Claude API key, configured in settings and kept private.
+          This operation uses a new Sift subfolder so that your original bookmarks are preserved.
+        </p>
       </div>
 
       <style>{`
@@ -371,17 +354,24 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
           flex: 1;
         }
 
+        .ai-hint {
+          font-size: 11px;
+          color: #6c757d;
+          margin: 8px 0 0 0;
+          line-height: 1.4;
+        }
+
         .progress-container {
           background: white;
           border-radius: 8px;
-          padding: 16px;
-          margin-bottom: 16px;
+          padding: 12px;
+          margin-bottom: 12px;
         }
 
         .progress-header {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
           font-size: 14px;
           font-weight: 500;
         }
@@ -403,7 +393,7 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         .progress-details {
           display: flex;
           justify-content: space-between;
-          margin-top: 8px;
+          margin-top: 4px;
           font-size: 12px;
           color: #6c757d;
         }
