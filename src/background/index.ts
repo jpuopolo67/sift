@@ -1,4 +1,4 @@
-import { MessageType, SiftBookmark, DuplicateGroup, DeadLinkCheckState, DEFAULT_DEAD_LINK_CHECK_STATE } from '../utils/types';
+import { MessageType, SiftBookmark, DuplicateGroup, DeadLinkCheckState, DEFAULT_DEAD_LINK_CHECK_STATE, DeadLinkCacheEntry } from '../utils/types';
 import {
   getAllBookmarks,
   searchBookmarks,
@@ -12,7 +12,7 @@ import {
 import { calculateHealthMetrics } from '../services/health';
 import { checkLinks } from '../services/linkChecker';
 import { suggestCategories, suggestRenames } from '../services/ai';
-import { getSettings, saveSettings } from '../services/storage';
+import { getSettings, saveSettings, getDeadLinkCache, updateDeadLinkCacheEntries } from '../services/storage';
 import { selectBookmarkToKeep } from '../utils/duplicates';
 
 chrome.runtime.onMessage.addListener((message: MessageType, _sender, sendResponse) => {
@@ -180,7 +180,7 @@ async function cancelDeadLinkCheck(): Promise<{ success: boolean }> {
   return { success: true };
 }
 
-async function startDeadLinkCheck(): Promise<{ started: boolean; message?: string }> {
+async function startDeadLinkCheck(): Promise<{ started: boolean; message?: string; skipped?: number }> {
   // Check if already running
   const currentState = await getDeadLinkCheckStatus();
   if (currentState.status === 'running') {
@@ -190,22 +190,45 @@ async function startDeadLinkCheck(): Promise<{ started: boolean; message?: strin
   // Reset cancel flag
   checkCancelled = false;
 
+  // Get settings and cache
+  const settings = await getSettings();
+  const cache = await getDeadLinkCache();
+  const refreshThreshold = Date.now() - (settings.deadLinkRefreshDays * 24 * 60 * 60 * 1000);
+
   // Get all bookmarks
-  const bookmarks = await getAllBookmarks();
-  const total = bookmarks.length;
+  const allBookmarks = await getAllBookmarks();
+
+  // Filter bookmarks based on cache - only check those not recently checked
+  const bookmarksToCheck: SiftBookmark[] = [];
+  const cachedDeadLinks: SiftBookmark[] = [];
+
+  for (const bookmark of allBookmarks) {
+    const cacheEntry = cache[bookmark.url];
+    if (cacheEntry && cacheEntry.lastChecked > refreshThreshold) {
+      // Recently checked - use cached result
+      if (cacheEntry.status === 'dead') {
+        cachedDeadLinks.push(bookmark);
+      }
+    } else {
+      // Not recently checked - needs to be checked
+      bookmarksToCheck.push(bookmark);
+    }
+  }
+
+  const skipped = allBookmarks.length - bookmarksToCheck.length;
 
   // Initialize state
   const initialState: DeadLinkCheckState = {
     status: 'running',
     checked: 0,
-    total,
-    deadLinks: [],
+    total: bookmarksToCheck.length,
+    deadLinks: [...cachedDeadLinks], // Start with cached dead links
     startedAt: Date.now(),
   };
   await saveDeadLinkCheckState(initialState);
 
   // Start the check in the background (don't await)
-  runDeadLinkCheck(bookmarks).catch((error) => {
+  runDeadLinkCheck(bookmarksToCheck, cachedDeadLinks).catch((error) => {
     console.error('Dead link check error:', error);
     getDeadLinkCheckStatus().then((state) => {
       saveDeadLinkCheckState({
@@ -217,12 +240,13 @@ async function startDeadLinkCheck(): Promise<{ started: boolean; message?: strin
     });
   });
 
-  return { started: true };
+  return { started: true, skipped };
 }
 
-async function runDeadLinkCheck(bookmarks: SiftBookmark[]): Promise<void> {
+async function runDeadLinkCheck(bookmarks: SiftBookmark[], cachedDeadLinks: SiftBookmark[]): Promise<void> {
   const BATCH_SIZE = 10;
-  const deadLinks: SiftBookmark[] = [];
+  const newDeadLinks: SiftBookmark[] = [];
+  const allDeadLinks = [...cachedDeadLinks]; // Include cached dead links in total
 
   for (let i = 0; i < bookmarks.length; i += BATCH_SIZE) {
     // Check if cancelled
@@ -236,12 +260,25 @@ async function runDeadLinkCheck(bookmarks: SiftBookmark[]): Promise<void> {
     try {
       const results = await checkLinks(urls);
 
-      // Match results back to bookmarks
+      // Build cache entries for this batch
+      const cacheEntries: Record<string, DeadLinkCacheEntry> = {};
+      const now = Date.now();
+
+      // Match results back to bookmarks and update cache
       results.forEach((result, idx) => {
+        const bookmark = batch[idx];
+        cacheEntries[bookmark.url] = {
+          lastChecked: now,
+          status: result.status,
+        };
         if (result.status === 'dead') {
-          deadLinks.push(batch[idx]);
+          newDeadLinks.push(bookmark);
+          allDeadLinks.push(bookmark);
         }
       });
+
+      // Update cache with this batch's results
+      await updateDeadLinkCacheEntries(cacheEntries);
     } catch (error) {
       console.error('Batch check error:', error);
       // Continue with next batch on error
@@ -253,27 +290,28 @@ async function runDeadLinkCheck(bookmarks: SiftBookmark[]): Promise<void> {
       status: 'running',
       checked,
       total: bookmarks.length,
-      deadLinks: [...deadLinks],
+      deadLinks: [...allDeadLinks],
       startedAt: (await getDeadLinkCheckStatus()).startedAt,
     });
   }
 
   // Check wasn't cancelled, so mark as completed
   if (!checkCancelled) {
+    const totalChecked = bookmarks.length;
     const finalState: DeadLinkCheckState = {
       status: 'completed',
-      checked: bookmarks.length,
-      total: bookmarks.length,
-      deadLinks,
+      checked: totalChecked,
+      total: totalChecked,
+      deadLinks: allDeadLinks,
       startedAt: (await getDeadLinkCheckStatus()).startedAt,
       completedAt: Date.now(),
     };
     await saveDeadLinkCheckState(finalState);
 
     // Send notification
-    const message = deadLinks.length > 0
-      ? `Found ${deadLinks.length} dead link${deadLinks.length === 1 ? '' : 's'} out of ${bookmarks.length} bookmarks checked.`
-      : `All ${bookmarks.length} bookmarks are working!`;
+    const message = allDeadLinks.length > 0
+      ? `Found ${allDeadLinks.length} dead link${allDeadLinks.length === 1 ? '' : 's'} (${newDeadLinks.length} new, ${cachedDeadLinks.length} cached).`
+      : `All ${totalChecked} bookmarks checked are working!`;
     chrome.notifications.create({
       type: 'basic',
       title: 'Sift - Dead Link Check Complete',

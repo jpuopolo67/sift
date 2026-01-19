@@ -86,6 +86,27 @@ function Options() {
           When enabled, Sift will check all bookmark URLs for dead links automatically.
           This may slow down the initial dashboard load for large bookmark collections.
         </p>
+
+        <label style={{ ...styles.label, marginTop: '16px' }}>
+          <span>Refresh rate (days):</span>
+          <input
+            type="number"
+            min="1"
+            max="365"
+            value={settings.deadLinkRefreshDays}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                deadLinkRefreshDays: parseInt((e.target as HTMLInputElement).value) || 7,
+              })
+            }
+            style={styles.input}
+          />
+        </label>
+        <p style={styles.hint}>
+          Only re-check links that haven't been checked within this many days.
+          Links checked more recently will be skipped to speed up the process. Default: 7 days.
+        </p>
       </div>
 
       <div style={styles.section}>

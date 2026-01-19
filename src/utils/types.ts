@@ -45,14 +45,25 @@ export interface LinkCheckResult {
 export interface SiftSettings {
   staleThresholdDays: number;
   autoCheckDeadLinks: boolean;
+  deadLinkRefreshDays: number;
   claudeApiKey: string;
 }
 
 export const DEFAULT_SETTINGS: SiftSettings = {
   staleThresholdDays: 180,
   autoCheckDeadLinks: false,
+  deadLinkRefreshDays: 7,
   claudeApiKey: '',
 };
+
+// Cache entry for dead link checking - stores last check time and result per URL
+export interface DeadLinkCacheEntry {
+  lastChecked: number; // timestamp
+  status: 'alive' | 'dead' | 'timeout' | 'error';
+}
+
+// Map of URL to cache entry
+export type DeadLinkCache = Record<string, DeadLinkCacheEntry>;
 
 export interface CategorySuggestion {
   folderName: string;

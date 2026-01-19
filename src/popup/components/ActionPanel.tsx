@@ -123,6 +123,10 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         setStatus(result.message || 'Failed to start check');
         onStatusChange(result.message || 'Failed to start check');
       } else {
+        // Show skipped count if any links were skipped due to caching
+        if (result.skipped && result.skipped > 0) {
+          onStatusChange(`Starting check... (${result.skipped} links skipped - recently checked)`);
+        }
         // Immediately check status to start polling
         await checkDeadLinkStatus();
       }

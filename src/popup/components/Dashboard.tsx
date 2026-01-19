@@ -19,6 +19,29 @@ function getScoreLabel(score: number): string {
   return 'Poor';
 }
 
+function getScoreExplanation(metrics: HealthMetrics, duplicateCount: number): string {
+  const issues: string[] = [];
+
+  if (duplicateCount > 0) {
+    issues.push(`${duplicateCount} duplicate${duplicateCount > 1 ? 's' : ''}`);
+  }
+  if (metrics.deadLinks.length > 0) {
+    issues.push(`${metrics.deadLinks.length} dead link${metrics.deadLinks.length > 1 ? 's' : ''}`);
+  }
+  if (metrics.staleBookmarks.length > 0) {
+    issues.push(`${metrics.staleBookmarks.length} stale`);
+  }
+  if (metrics.uncategorizedCount > 10) {
+    issues.push(`${metrics.uncategorizedCount} uncategorized`);
+  }
+
+  if (issues.length === 0) {
+    return 'Your bookmarks are well organized!';
+  }
+
+  return `Score affected by: ${issues.join(', ')}`;
+}
+
 export function Dashboard({ metrics }: DashboardProps) {
   const duplicateCount = metrics.duplicates.reduce(
     (sum, g) => sum + g.bookmarks.length - 1,
@@ -32,6 +55,7 @@ export function Dashboard({ metrics }: DashboardProps) {
           {metrics.healthScore}
         </div>
         <span class="score-label">{getScoreLabel(metrics.healthScore)}</span>
+        <p class="score-explanation">{getScoreExplanation(metrics, duplicateCount)}</p>
       </div>
 
       <div class="metrics-grid">
