@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Sift Bookmark Manager",
+  "version": "0.1.0",
+  "description": "AI-powered bookmark manager for Chromium browsers",
+  "permissions": [
+    "bookmarks",
+    "history",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "Sift Bookmarks"
+  },
+  "options_page": "options/index.html",
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  }
+}

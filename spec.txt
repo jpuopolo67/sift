@@ -1,0 +1,43 @@
+# Specification for SIFT Chromium Bookmark Manager
+
+PURPOSE
+Sift is an AI-powered, bookmarks manager for Chromium browsers. The Sift bookmarks managers makes
+managing a user's boikmark hierarchy and their bookmarks effective and efficient. It takes the
+drudgery and complexity out of managing a large, complex set of bookmarks that has grown 
+unweildy over time. It should be easy to use, implement a clean, minimal interface, and provided
+intuitive controls.
+
+CORE FEATURES
+The sift bookmarks manager implements the following core features. 
+Note that the "*" is used a bullet to distinguish distinct functionality. The dash "-" is used as a sub-bullet.
+
+* Provide a visual summary "health dashboard" for the current bookmarks. It calcualtes a health score between 
+1 and 100 based on the following criteria:
+
+-Total bookmarks / folders
+-Duplicates found
+-Dead links
+-Stale bookmarks
+-Uncategorized items
+-Domains dominating bookmarks (Google, GitHub, AWS, etc.)
+
+* It can recursively sort all bookmark folders and bookmarks.
+* It provides content-aware categorization. It can inspect the user's bookmark hierarchy and 
+folder structure to that it can categorize the folders and bookmarks into a new, ogical hierarchy 
+based on clear categories. 
+* Remove redundant or duplicate bookmarks based on the target URL to which the bookmark refers.
+* Rename bookmarks to clarify referred-to content.
+* Delete bookmarks that haven't been visited in a specified amount of time or since a given date. 
+* After cleaning up the bookmark and the bookmark hierarchy, and making it as logical as possible, 
+Sift will store the new set of bookmarks under a root bookmark folder called Sift, in a subfolder 
+with a name specified by the user. If the user doesn't specify a name, use the current date in YYYY-MM-DD format.
+This feature avoids overwriting their user's current bookmark hierarchy and bookmarks. 
+* Provide a way for the user to get a clickable list of bookmarks based on a keyword/filter.
+
+TECHNOLOGIES
+Since this is Chromium extention, use TypeScript for the core extension and React or Preact where is makes sense. For 
+example, to create the visual health dashboard, it makes sense to use Preact. 
+
+To assess the semantics and logic of the bookmark hierarchy, bookmark names, renaming based on content, etc.,
+we'll use a large language model. Use Claude Haiku 4.5. The API key will reside in a configuration file.
+Make sure to use contemporary techniques that hide the API key from users of the extension.
