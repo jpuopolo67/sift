@@ -39,10 +39,16 @@ describe('normalizeUrl', () => {
     expect(normalized).toBe('https://example.com/page');
   });
 
-  it('removes default http port', () => {
+  it('removes default http port and normalizes to https', () => {
     const url = 'http://example.com:80/page';
     const normalized = normalizeUrl(url);
-    expect(normalized).toBe('http://example.com/page');
+    expect(normalized).toBe('https://example.com/page');
+  });
+
+  it('treats http and https URLs as equivalent', () => {
+    const httpUrl = 'http://example.com/page';
+    const httpsUrl = 'https://example.com/page';
+    expect(normalizeUrl(httpUrl)).toBe(normalizeUrl(httpsUrl));
   });
 
   it('sorts query parameters', () => {

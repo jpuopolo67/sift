@@ -1,4 +1,5 @@
 import { SiftBookmark, SiftFolder } from '../utils/types';
+import { normalizeUrl } from '../utils/duplicates';
 
 export async function getBookmarkTree(): Promise<chrome.bookmarks.BookmarkTreeNode[]> {
   return chrome.bookmarks.getTree();
@@ -141,7 +142,7 @@ export async function createSiftFolder(): Promise<{ folder: chrome.bookmarks.Boo
 
 export async function searchBookmarks(query: string): Promise<SiftBookmark[]> {
   const results = await chrome.bookmarks.search(query);
-  return results
+  const bookmarks = results
     .filter((node) => node.url)
     .map((node) => ({
       id: node.id,
@@ -150,6 +151,19 @@ export async function searchBookmarks(query: string): Promise<SiftBookmark[]> {
       parentId: node.parentId,
       dateAdded: node.dateAdded,
     }));
+
+  // Deduplicate by normalized URL, keeping the most recent bookmark
+  // This ensures consistency with duplicate detection logic
+  const urlMap = new Map<string, SiftBookmark>();
+  for (const bookmark of bookmarks) {
+    const normalized = normalizeUrl(bookmark.url);
+    const existing = urlMap.get(normalized);
+    if (!existing || (bookmark.dateAdded || 0) > (existing.dateAdded || 0)) {
+      urlMap.set(normalized, bookmark);
+    }
+  }
+
+  return Array.from(urlMap.values());
 }
 
 export async function sortFolder(folderId: string): Promise<void> {

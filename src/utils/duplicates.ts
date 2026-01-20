@@ -19,6 +19,9 @@ export function normalizeUrl(url: string): string {
   try {
     const parsed = new URL(url);
 
+    // Normalize protocol: treat http and https as equivalent (use https as canonical)
+    parsed.protocol = 'https:';
+
     // Remove tracking parameters
     for (const param of TRACKING_PARAMS) {
       parsed.searchParams.delete(param);
@@ -38,12 +41,7 @@ export function normalizeUrl(url: string): string {
     }
 
     // Remove default ports
-    if (
-      (parsed.protocol === 'https:' && parsed.port === '443') ||
-      (parsed.protocol === 'http:' && parsed.port === '80')
-    ) {
-      parsed.port = '';
-    }
+    parsed.port = '';
 
     // Sort query parameters for consistent comparison
     const sortedParams = new URLSearchParams(
