@@ -1,7 +1,13 @@
 {
   "name": "sift-bookmark-manager",
-  "version": "0.1.0",
-  "description": "AI-powered bookmark manager for Chromium browsers",
+  "version": "1.0.0",
+  "description": "Claude AI-powered bookmark manager for Chromium browsers",
+   "icons": {
+    "16": "public/icons/icon16.png",
+    "32": "public/icons/icon32.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite build --watch",
@@ -9,7 +15,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "icons": "node scripts/generate-icons.cjs",
+    "package": "node scripts/package.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",

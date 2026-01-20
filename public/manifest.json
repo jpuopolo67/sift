@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Sift Bookmark Manager",
-  "version": "0.1.0",
-  "description": "AI-powered bookmark manager for Chromium browsers",
+  "version": "1.0.0",
+  "description": "AI-powered bookmark manager that helps organize, clean up duplicates, find dead links, and intelligently categorize your bookmarks using Claude AI.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": [
     "bookmarks",
     "history",
@@ -14,7 +20,12 @@
   ],
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "Sift Bookmarks"
+    "default_title": "Sift Bookmarks",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
   },
   "options_page": "options/index.html",
   "background": {

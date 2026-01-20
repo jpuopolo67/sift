@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { HealthMetrics, SiftBookmark, DeadLinkCheckState } from '../../utils/types';
+import { HealthMetrics, SiftBookmark, DeadLinkCheckState, CategorizationState } from '../../utils/types';
 import { DuplicatesList } from './DuplicatesList';
 import { DeadLinksList } from './DeadLinksList';
 
@@ -15,19 +15,25 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [showDeadLinks, setShowDeadLinks] = useState(false);
   const [deadLinkCheckState, setDeadLinkCheckState] = useState<DeadLinkCheckState | null>(null);
+  const [categorizationState, setCategorizationState] = useState<CategorizationState | null>(null);
   const pollIntervalRef = useRef<number | null>(null);
+  const categorizationPollRef = useRef<number | null>(null);
 
-  // Check dead link status on mount and poll while running
+  // Check status on mount and poll while running
   useEffect(() => {
     checkDeadLinkStatus();
+    checkCategorizationStatus();
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
       }
+      if (categorizationPollRef.current) {
+        clearInterval(categorizationPollRef.current);
+      }
     };
   }, []);
 
-  // Start/stop polling based on check state
+  // Start/stop polling based on dead link check state
   useEffect(() => {
     if (deadLinkCheckState?.status === 'running') {
       if (!pollIntervalRef.current) {
@@ -45,12 +51,55 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
     }
   }, [deadLinkCheckState]);
 
+  // Start/stop polling based on categorization state
+  useEffect(() => {
+    if (categorizationState?.status === 'running') {
+      if (!categorizationPollRef.current) {
+        categorizationPollRef.current = window.setInterval(checkCategorizationStatus, 500);
+      }
+      const phaseLabel = getCategorizationPhaseLabel(categorizationState);
+      onStatusChange(phaseLabel);
+    } else {
+      if (categorizationPollRef.current) {
+        clearInterval(categorizationPollRef.current);
+        categorizationPollRef.current = null;
+      }
+      if (categorizationState?.status === 'completed' && !categorizationState.error) {
+        onStatusChange(`Categorization complete! Created ${categorizationState.categoriesCreated} folders with ${categorizationState.bookmarksCopied} bookmarks in Sift/${categorizationState.siftFolderName}`);
+      }
+    }
+  }, [categorizationState]);
+
+  function getCategorizationPhaseLabel(state: CategorizationState): string {
+    switch (state.phase) {
+      case 'fetching':
+        return 'Fetching bookmarks...';
+      case 'analyzing':
+        return `Analyzing with AI: batch ${state.currentBatch}/${state.totalBatches}`;
+      case 'creating':
+        return `Creating folders: ${state.bookmarksCopied} bookmarks copied`;
+      case 'done':
+        return 'Categorization complete!';
+      default:
+        return 'Processing...';
+    }
+  }
+
   async function checkDeadLinkStatus() {
     try {
       const state: DeadLinkCheckState = await chrome.runtime.sendMessage({ type: 'GET_DEAD_LINK_CHECK_STATUS' });
       setDeadLinkCheckState(state);
     } catch (error) {
       console.error('Failed to get dead link check status:', error);
+    }
+  }
+
+  async function checkCategorizationStatus() {
+    try {
+      const state: CategorizationState = await chrome.runtime.sendMessage({ type: 'GET_CATEGORIZATION_STATUS' });
+      setCategorizationState(state);
+    } catch (error) {
+      console.error('Failed to get categorization status:', error);
     }
   }
 
@@ -157,18 +206,53 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
     }
   }
 
-  async function categorizeWithAI() {
-    await handleAction('AI categorization', async () => {
-      onStatusChange('Fetching bookmarks for AI analysis...');
-      const bookmarks = await chrome.runtime.sendMessage({ type: 'GET_BOOKMARKS' });
-      onStatusChange(`Sending ${bookmarks.length} bookmarks to Claude for categorization...`);
-      const suggestions = await chrome.runtime.sendMessage({
-        type: 'CATEGORIZE_BOOKMARKS',
-        bookmarks,
-      });
-      if (suggestions.error) throw new Error(suggestions.error);
-      onStatusChange(`AI suggested ${suggestions.length} categories`);
-    });
+  async function startCategorization() {
+    try {
+      // First check if API key is configured
+      const settings = await chrome.runtime.sendMessage({ type: 'GET_SETTINGS' });
+      if (!settings.claudeApiKey) {
+        setStatus('Claude API key required. Opening settings...');
+        onStatusChange('Claude API key required - configure in Settings');
+        // Open the options page
+        chrome.runtime.openOptionsPage();
+        return;
+      }
+
+      onStatusChange('Starting AI categorization...');
+      const result = await chrome.runtime.sendMessage({ type: 'START_CATEGORIZATION' });
+      if (!result.started) {
+        setStatus(result.message || 'Failed to start categorization');
+        onStatusChange(result.message || 'Failed to start categorization');
+      } else {
+        // Immediately check status to start polling
+        await checkCategorizationStatus();
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setStatus(`Error: ${errorMsg}`);
+      onStatusChange(`Error: ${errorMsg}`);
+    }
+  }
+
+  async function cancelCategorization() {
+    try {
+      await chrome.runtime.sendMessage({ type: 'CANCEL_CATEGORIZATION' });
+      await checkCategorizationStatus();
+      onStatusChange('Categorization cancelled');
+    } catch (error) {
+      console.error('Failed to cancel categorization:', error);
+    }
+  }
+
+  async function clearCategorizationResults() {
+    try {
+      await chrome.runtime.sendMessage({ type: 'CLEAR_CATEGORIZATION_RESULTS' });
+      await checkCategorizationStatus();
+      onStatusChange('Ready');
+      onActionComplete(); // Refresh metrics since bookmarks were added
+    } catch (error) {
+      console.error('Failed to clear categorization results:', error);
+    }
   }
 
   async function deleteDeadLinks(bookmarksToDelete: SiftBookmark[]) {
@@ -213,6 +297,13 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
   const hasResults = deadLinkCheckState?.status === 'completed' && deadLinkCheckState.deadLinks.length > 0;
   const progressPercent = deadLinkCheckState && deadLinkCheckState.total > 0
     ? Math.round((deadLinkCheckState.checked / deadLinkCheckState.total) * 100)
+    : 0;
+
+  const isCategorizationRunning = categorizationState?.status === 'running';
+  const hasCategorizationResults = categorizationState?.status === 'completed' && !categorizationState.error;
+  const hasCategorizationError = categorizationState?.status === 'completed' && categorizationState.error;
+  const categorizationProgressPercent = categorizationState && categorizationState.totalBatches > 0
+    ? Math.round((categorizationState.currentBatch / categorizationState.totalBatches) * 100)
     : 0;
 
   return (
@@ -330,16 +421,92 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         <span class="section-title">AI Features</span>
       </div>
 
+      {isCategorizationRunning && categorizationState && (
+        <div class="progress-container">
+          <div class="progress-header">
+            <span>AI Categorization (runs in background)...</span>
+            <span>
+              {categorizationState.phase === 'analyzing'
+                ? `${categorizationState.currentBatch}/${categorizationState.totalBatches} batches`
+                : categorizationState.phase === 'creating'
+                ? `${categorizationState.bookmarksCopied} bookmarks`
+                : ''}
+            </span>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              style={{ width: `${categorizationProgressPercent}%` }}
+            />
+          </div>
+          <div class="progress-details">
+            <span>{getCategorizationPhaseLabel(categorizationState)}</span>
+            <span>{categorizationProgressPercent}% complete</span>
+          </div>
+          <button
+            class="btn btn-secondary"
+            onClick={cancelCategorization}
+            style={{ marginTop: '8px', width: '100%' }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {hasCategorizationResults && categorizationState && (
+        <div class="progress-container">
+          <div class="progress-header">
+            <span>Categorization Complete</span>
+          </div>
+          <div class="progress-details" style={{ marginTop: '0' }}>
+            <span>
+              Created {categorizationState.categoriesCreated} folders with {categorizationState.bookmarksCopied} bookmarks
+            </span>
+          </div>
+          <div class="progress-details" style={{ marginTop: '4px' }}>
+            <span>Location: Sift/{categorizationState.siftFolderName}</span>
+          </div>
+          <button
+            class="btn btn-secondary"
+            onClick={clearCategorizationResults}
+            style={{ marginTop: '12px', width: '100%' }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {hasCategorizationError && categorizationState && (
+        <div class="progress-container" style={{ borderLeft: '3px solid #dc3545' }}>
+          <div class="progress-header">
+            <span>Categorization Failed</span>
+          </div>
+          <div class="progress-details" style={{ marginTop: '0', color: '#dc3545' }}>
+            <span>{categorizationState.error}</span>
+          </div>
+          <button
+            class="btn btn-secondary"
+            onClick={clearCategorizationResults}
+            style={{ marginTop: '12px', width: '100%' }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div class="actions">
         <button
           class="btn btn-primary"
-          onClick={categorizeWithAI}
-          disabled={loading !== null}
+          onClick={startCategorization}
+          disabled={loading !== null || isCategorizationRunning}
         >
-          {loading === 'AI categorization' ? 'Analyzing...' : 'Restructure Folders & Bookmarks'}
+          {isCategorizationRunning
+            ? `Categorizing... (${categorizationProgressPercent}%)`
+            : 'Restructure Folders & Bookmarks'}
         </button>
-        <p class="ai-hint">Uses Claude Haiku 4.5. Requires a Claude API key, configured in settings and kept private.
-         Creates a new Sift subfolder so that your original bookmarks are preserved.
+        <p class="ai-hint">
+          Uses Claude Haiku 4.5. Requires a Claude API key, configured in settings and kept private.
+          Creates a new Sift subfolder so that your original bookmarks are preserved.
         </p>
       </div>
 

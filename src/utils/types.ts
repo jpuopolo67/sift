@@ -92,6 +92,30 @@ export const DEFAULT_DEAD_LINK_CHECK_STATE: DeadLinkCheckState = {
   deadLinks: [],
 };
 
+export interface CategorizationState {
+  status: 'idle' | 'running' | 'completed' | 'cancelled';
+  phase: 'fetching' | 'analyzing' | 'creating' | 'done';
+  currentBatch: number;
+  totalBatches: number;
+  categoriesCreated: number;
+  bookmarksCopied: number;
+  totalBookmarks: number;
+  startedAt?: number;
+  completedAt?: number;
+  error?: string;
+  siftFolderName?: string;
+}
+
+export const DEFAULT_CATEGORIZATION_STATE: CategorizationState = {
+  status: 'idle',
+  phase: 'fetching',
+  currentBatch: 0,
+  totalBatches: 0,
+  categoriesCreated: 0,
+  bookmarksCopied: 0,
+  totalBookmarks: 0,
+};
+
 export type MessageType =
   | { type: 'GET_BOOKMARKS' }
   | { type: 'GET_HEALTH_METRICS' }
@@ -110,4 +134,8 @@ export type MessageType =
   | { type: 'START_DEAD_LINK_CHECK' }
   | { type: 'GET_DEAD_LINK_CHECK_STATUS' }
   | { type: 'CANCEL_DEAD_LINK_CHECK' }
-  | { type: 'CLEAR_DEAD_LINK_RESULTS' };
+  | { type: 'CLEAR_DEAD_LINK_RESULTS' }
+  | { type: 'START_CATEGORIZATION' }
+  | { type: 'GET_CATEGORIZATION_STATUS' }
+  | { type: 'CANCEL_CATEGORIZATION' }
+  | { type: 'CLEAR_CATEGORIZATION_RESULTS' };

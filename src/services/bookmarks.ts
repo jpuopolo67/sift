@@ -97,8 +97,8 @@ export async function updateBookmark(
   return chrome.bookmarks.update(id, changes);
 }
 
-export async function createSiftFolder(name?: string): Promise<chrome.bookmarks.BookmarkTreeNode> {
-  const folderName = name || new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+export async function createSiftFolder(): Promise<{ folder: chrome.bookmarks.BookmarkTreeNode; folderName: string }> {
+  const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   // Check if Sift root folder exists
   const tree = await getBookmarkTree();
@@ -123,8 +123,20 @@ export async function createSiftFolder(name?: string): Promise<chrome.bookmarks.
     siftRoot = await createFolder('Sift', '1');
   }
 
+  // Find unique folder name (date or date-N)
+  const existingChildren = siftRoot.children || [];
+  const existingNames = new Set(existingChildren.map(c => c.title));
+
+  let folderName = dateStr;
+  let counter = 1;
+  while (existingNames.has(folderName)) {
+    folderName = `${dateStr}-${counter}`;
+    counter++;
+  }
+
   // Create the named subfolder
-  return createFolder(folderName, siftRoot.id);
+  const folder = await createFolder(folderName, siftRoot.id);
+  return { folder, folderName };
 }
 
 export async function searchBookmarks(query: string): Promise<SiftBookmark[]> {
