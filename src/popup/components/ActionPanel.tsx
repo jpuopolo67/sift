@@ -314,7 +314,7 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         >
           {loading === 'Delete stale bookmarks'
             ? 'Deleting...'
-            : `Delete ${metrics.staleBookmarks.length} Stale Bookmarks`}
+            : `Delete Stale Bookmarks (${metrics.staleBookmarks.length})`}
         </button>
 
         <button
@@ -338,9 +338,8 @@ export function ActionPanel({ metrics, onActionComplete, onStatusChange }: Actio
         >
           {loading === 'AI categorization' ? 'Analyzing...' : 'Restructure Folders & Bookmarks'}
         </button>
-        <p class="ai-hint">
-          Requires your Claude API key, configured in settings and kept private.
-          This operation uses a new Sift subfolder so that your original bookmarks are preserved.
+        <p class="ai-hint">Uses Claude Haiku 4.5. Requires a Claude API key, configured in settings and kept private.
+         Creates a new Sift subfolder so that your original bookmarks are preserved.
         </p>
       </div>
 

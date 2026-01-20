@@ -3,7 +3,7 @@ import { findDuplicates } from '../utils/duplicates';
 import { getAllBookmarks, getAllFolders } from './bookmarks';
 import { getStaleBookmarks } from './history';
 import { findDeadLinks } from './linkChecker';
-import { getSettings } from './storage';
+import { getSettings, getDeadLinkCache } from './storage';
 
 // Root folder IDs that indicate uncategorized bookmarks
 const ROOT_FOLDER_IDS = ['0', '1', '2']; // Root, Bookmarks Bar, Other Bookmarks
@@ -106,6 +106,10 @@ export async function calculateHealthMetrics(
   let deadLinks: SiftBookmark[] = [];
   if (checkDeadLinks) {
     deadLinks = await findDeadLinks(bookmarks);
+  } else {
+    // If not checking live, use cached results
+    const cache = await getDeadLinkCache();
+    deadLinks = bookmarks.filter(b => cache[b.url]?.status === 'dead');
   }
 
   const partialMetrics = {

@@ -10,7 +10,7 @@ import {
   getBookmarkPaths,
 } from '../services/bookmarks';
 import { calculateHealthMetrics } from '../services/health';
-import { checkLinks } from '../services/linkChecker';
+import { checkLinks, filterBookmarksToCheck } from '../services/linkChecker';
 import { suggestCategories, suggestRenames } from '../services/ai';
 import { getSettings, saveSettings, getDeadLinkCache, updateDeadLinkCacheEntries } from '../services/storage';
 import { selectBookmarkToKeep } from '../utils/duplicates';
@@ -34,7 +34,14 @@ async function handleMessage(message: MessageType): Promise<unknown> {
 
     case 'GET_HEALTH_METRICS':
       const settings = await getSettings();
-      return calculateHealthMetrics(settings.autoCheckDeadLinks);
+
+      // Trigger background check if enabled and needed (respects threshold)
+      if (settings.autoCheckDeadLinks) {
+        startDeadLinkCheck().catch((err) => console.error('Failed to auto-start dead link check:', err));
+      }
+
+      // Pass false to use cached results immediatey while check runs in background
+      return calculateHealthMetrics(false);
 
     case 'GET_BOOKMARK_PATHS':
       return getBookmarkPaths(message.bookmarkIds);
@@ -193,27 +200,16 @@ async function startDeadLinkCheck(): Promise<{ started: boolean; message?: strin
   // Get settings and cache
   const settings = await getSettings();
   const cache = await getDeadLinkCache();
-  const refreshThreshold = Date.now() - (settings.deadLinkRefreshDays * 24 * 60 * 60 * 1000);
 
   // Get all bookmarks
   const allBookmarks = await getAllBookmarks();
 
   // Filter bookmarks based on cache - only check those not recently checked
-  const bookmarksToCheck: SiftBookmark[] = [];
-  const cachedDeadLinks: SiftBookmark[] = [];
-
-  for (const bookmark of allBookmarks) {
-    const cacheEntry = cache[bookmark.url];
-    if (cacheEntry && cacheEntry.lastChecked > refreshThreshold) {
-      // Recently checked - use cached result
-      if (cacheEntry.status === 'dead') {
-        cachedDeadLinks.push(bookmark);
-      }
-    } else {
-      // Not recently checked - needs to be checked
-      bookmarksToCheck.push(bookmark);
-    }
-  }
+  const { bookmarksToCheck, cachedDeadLinks } = filterBookmarksToCheck(
+    allBookmarks,
+    cache,
+    settings.deadLinkRefreshDays
+  );
 
   const skipped = allBookmarks.length - bookmarksToCheck.length;
 

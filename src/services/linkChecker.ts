@@ -1,4 +1,4 @@
-import { LinkCheckResult, SiftBookmark } from '../utils/types';
+import { LinkCheckResult, SiftBookmark, DeadLinkCache } from '../utils/types';
 
 const TIMEOUT_MS = 10000;
 const BATCH_SIZE = 5;
@@ -78,4 +78,29 @@ export async function findDeadLinks(bookmarks: SiftBookmark[]): Promise<SiftBook
   );
 
   return bookmarks.filter((b) => deadUrls.has(b.url));
+}
+
+export function filterBookmarksToCheck(
+  bookmarks: SiftBookmark[],
+  cache: DeadLinkCache,
+  refreshDays: number
+): { bookmarksToCheck: SiftBookmark[]; cachedDeadLinks: SiftBookmark[] } {
+  const refreshThreshold = Date.now() - refreshDays * 24 * 60 * 60 * 1000;
+  const bookmarksToCheck: SiftBookmark[] = [];
+  const cachedDeadLinks: SiftBookmark[] = [];
+
+  for (const bookmark of bookmarks) {
+    const cacheEntry = cache[bookmark.url];
+    if (cacheEntry && cacheEntry.lastChecked > refreshThreshold) {
+      // Recently checked - use cached result
+      if (cacheEntry.status === 'dead') {
+        cachedDeadLinks.push(bookmark);
+      }
+    } else {
+      // Not recently checked - needs to be checked
+      bookmarksToCheck.push(bookmark);
+    }
+  }
+
+  return { bookmarksToCheck, cachedDeadLinks };
 }
