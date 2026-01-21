@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Sift Bookmark Manager - Pod67</title>
+  <meta name="description" content="Privacy policy for Sift Bookmark Manager Chrome extension.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <span>Pod67</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sift.html">Sift</a></li>
+        <li><a href="sift-support.html">Support</a></li>
+        <li><a href="sift-privacy.html" class="active">Privacy</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Privacy Policy</h1>
+    <p>Sift Bookmark Manager</p>
+  </header>
+
+  <!-- Content -->
+  <section class="content">
+    <div class="content-container">
+
+      <p><strong>Last Updated:</strong> January 2025</p>
+
+      <p>This Privacy Policy describes how Sift Bookmark Manager ("Sift," "we," "our," or "the extension") handles your information. We are committed to protecting your privacy and being transparent about our practices.</p>
+
+      <div class="info-box">
+        <p><strong>Summary:</strong> Sift processes your bookmark data locally in your browser. We do not collect, store, or transmit your personal data to our servers. The extension only makes external network requests when checking dead links or when you explicitly use the AI categorization feature.</p>
+      </div>
+
+      <h2>Information We Access</h2>
+
+      <p>Sift requires the following browser permissions to function:</p>
+
+      <h3>Bookmarks</h3>
+      <p>Sift reads your browser bookmarks to analyze them for duplicates, dead links, and organization. This data is processed entirely within your browser and is never transmitted to Pod67 servers.</p>
+
+      <h3>History</h3>
+      <p>Sift reads your browsing history to determine when you last visited bookmarked pages. This is used solely to identify "stale" bookmarks you haven't visited recently. History data is processed locally and is never transmitted externally.</p>
+
+      <h3>Storage</h3>
+      <p>Sift uses Chrome's local storage API to save your preferences (such as stale threshold settings) and cache dead link check results. This data is stored locally on your device and is not synced or transmitted.</p>
+
+      <h3>Notifications</h3>
+      <p>Sift may display browser notifications to inform you when background tasks (like dead link checking) are complete. No personal data is included in these notifications.</p>
+
+      <h3>Host Permissions (All URLs)</h3>
+      <p>Sift requires permission to access all URLs to perform dead link checking. When you initiate a dead link check, the extension sends HTTP HEAD requests to your bookmarked URLs to verify they are still accessible. These requests contain only the URL being checked and standard HTTP headers - no personal information is transmitted.</p>
+
+      <h2>Information We Collect</h2>
+
+      <p><strong>We do not collect any personal information.</strong></p>
+
+      <p>Sift does not:</p>
+      <ul>
+        <li>Collect or store your bookmarks on our servers</li>
+        <li>Track your browsing activity</li>
+        <li>Use analytics or tracking scripts</li>
+        <li>Require account creation or login</li>
+        <li>Collect usage statistics or telemetry</li>
+        <li>Access any data beyond what is necessary for the extension's functionality</li>
+      </ul>
+
+      <h2>Third-Party Services</h2>
+
+      <h3>Dead Link Checking</h3>
+      <p>When you use the dead link checking feature, Sift sends HTTP requests directly from your browser to the websites in your bookmarks. These requests go directly to the destination websites - they do not pass through Pod67 servers. The websites you have bookmarked may log these requests according to their own privacy policies.</p>
+
+      <h3>AI Categorization (Optional)</h3>
+      <p>If you choose to use the AI categorization feature, Sift sends your bookmark titles and URLs to the Anthropic API (Claude) for analysis. This feature:</p>
+      <ul>
+        <li>Requires you to provide your own Anthropic API key</li>
+        <li>Sends data directly from your browser to Anthropic's servers</li>
+        <li>Does not route data through Pod67 servers</li>
+        <li>Is entirely optional - the extension works fully without it</li>
+      </ul>
+      <p>Your use of the Anthropic API is subject to <a href="https://www.anthropic.com/privacy" target="_blank">Anthropic's Privacy Policy</a>. We recommend reviewing their policy before using AI features.</p>
+
+      <h3>Google Favicon Service</h3>
+      <p>Sift displays website favicons (small icons) next to bookmarks in the interface. These are loaded from Google's public favicon service. Google may log these requests according to their privacy policy. No personal information beyond the domain name is transmitted.</p>
+
+      <h2>Data Storage</h2>
+
+      <p>All data processed by Sift is stored locally on your device using Chrome's built-in storage APIs:</p>
+      <ul>
+        <li><strong>Settings:</strong> Your preferences (stale threshold, API key if provided) are stored in local storage</li>
+        <li><strong>Cache:</strong> Dead link check results are cached locally to avoid redundant checks</li>
+        <li><strong>Session data:</strong> Temporary data during bookmark analysis is held in memory only</li>
+      </ul>
+      <p>This data remains on your device and is not synced to the cloud or accessible to Pod67.</p>
+
+      <h2>Data Security</h2>
+
+      <p>Since Sift processes data locally within your browser, the security of your data depends on the security of your device and browser. We recommend:</p>
+      <ul>
+        <li>Keeping your browser updated to the latest version</li>
+        <li>Using a secure password for your computer</li>
+        <li>If using AI features, keeping your API key confidential</li>
+      </ul>
+
+      <h2>Your Rights and Choices</h2>
+
+      <h3>Access and Control</h3>
+      <p>You have full control over your data:</p>
+      <ul>
+        <li><strong>View your data:</strong> All bookmark analysis is displayed within the extension interface</li>
+        <li><strong>Delete cached data:</strong> Uninstall the extension to remove all locally stored data</li>
+        <li><strong>Disable features:</strong> You can choose not to use dead link checking or AI features</li>
+        <li><strong>Revoke permissions:</strong> You can remove the extension's permissions in Chrome settings</li>
+      </ul>
+
+      <h3>Opt-Out</h3>
+      <p>Since we don't collect data, there is nothing to opt out of. If you no longer wish to use Sift, simply uninstall the extension from <code>chrome://extensions</code>.</p>
+
+      <h2>Children's Privacy</h2>
+
+      <p>Sift is not directed at children under 13 years of age. We do not knowingly collect personal information from children. Since we do not collect any personal information from any users, this is not applicable to our extension.</p>
+
+      <h2>Changes to This Policy</h2>
+
+      <p>We may update this Privacy Policy from time to time. If we make material changes, we will update the "Last Updated" date at the top of this policy. We encourage you to review this policy periodically.</p>
+
+      <h2>Contact Us</h2>
+
+      <p>If you have any questions about this Privacy Policy or Sift's privacy practices, please contact us at:</p>
+
+      <p><strong>Email:</strong> <a href="mailto:john@pod67.com">john@pod67.com</a></p>
+
+      <p><strong>Website:</strong> <a href="https://pod67.com">https://pod67.com</a></p>
+
+      <h2>Summary of Data Practices</h2>
+
+      <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+        <thead>
+          <tr style="background: var(--surface); text-align: left;">
+            <th style="padding: 1rem; border: 1px solid var(--surface-light);">Data Type</th>
+            <th style="padding: 1rem; border: 1px solid var(--surface-light);">Collected?</th>
+            <th style="padding: 1rem; border: 1px solid var(--surface-light);">Transmitted?</th>
+            <th style="padding: 1rem; border: 1px solid var(--surface-light);">Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Bookmarks</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Only for AI features (optional)</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Duplicate detection, organization</td>
+          </tr>
+          <tr>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Browsing History</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Stale bookmark detection</td>
+          </tr>
+          <tr>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Settings/Preferences</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Locally only</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Remember user preferences</td>
+          </tr>
+          <tr>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">API Key (if provided)</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Locally only</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">To Anthropic only</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">AI categorization</td>
+          </tr>
+          <tr>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">Personal Information</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">No</td>
+            <td style="padding: 1rem; border: 1px solid var(--surface-light);">N/A</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="sift.html">Sift</a>
+        <a href="sift-support.html">Support</a>
+        <a href="sift-privacy.html">Privacy</a>
+      </div>
+      <p class="footer-copy">&copy; 2025 Pod67. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <style>
+    code {
+      background: var(--surface);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</body>
+</html>

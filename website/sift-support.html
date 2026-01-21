@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sift Support - Pod67</title>
+  <meta name="description" content="Get help with Sift Bookmark Manager. FAQs, troubleshooting, and contact information.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <span>Pod67</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sift.html">Sift</a></li>
+        <li><a href="sift-support.html" class="active">Support</a></li>
+        <li><a href="sift-privacy.html">Privacy</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Sift Support</h1>
+    <p>Get help with Sift Bookmark Manager</p>
+  </header>
+
+  <!-- Content -->
+  <section class="content">
+    <div class="content-container">
+
+      <h2>Frequently Asked Questions</h2>
+
+      <div class="support-card">
+        <h3>How do I install Sift?</h3>
+        <p>Visit the <a href="https://chrome.google.com/webstore" target="_blank">Chrome Web Store</a>, search for "Sift Bookmark Manager," and click "Add to Chrome." The extension will appear in your browser toolbar.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>How does duplicate detection work?</h3>
+        <p>Sift normalizes URLs before comparing them. This means it treats the following as duplicates:</p>
+        <ul>
+          <li><code>http://</code> and <code>https://</code> versions of the same URL</li>
+          <li>URLs with and without <code>www.</code></li>
+          <li>URLs with trailing slashes</li>
+          <li>URLs with tracking parameters (utm_source, fbclid, etc.)</li>
+        </ul>
+        <p>This catches duplicates that look different but point to the same page.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>What is the Health Score?</h3>
+        <p>The Health Score (1-100) reflects the overall state of your bookmark collection. Points are deducted for:</p>
+        <ul>
+          <li>Duplicate bookmarks</li>
+          <li>Dead links (broken URLs)</li>
+          <li>Stale bookmarks (not visited recently)</li>
+          <li>Uncategorized bookmarks in root folders</li>
+          <li>Poor folder organization</li>
+        </ul>
+        <p>A higher score means cleaner, better-organized bookmarks.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>How does dead link checking work?</h3>
+        <p>When you click "Check Dead Links," Sift tests each bookmarked URL in the background. It sends HTTP HEAD requests to verify the links are still working. Results are cached to avoid checking the same URLs repeatedly.</p>
+        <p><strong>Note:</strong> Some websites may block automated requests, which could result in false positives. Review the results before deleting.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>What are "stale" bookmarks?</h3>
+        <p>Stale bookmarks are pages you haven't visited in a long time (default: 180 days). You can adjust this threshold in the extension settings. Stale detection uses your browser history to determine when you last visited each bookmarked page.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>How do AI features work?</h3>
+        <p>The AI categorization feature uses Claude (by Anthropic) to analyze your bookmarks and suggest a logical folder structure. To use it:</p>
+        <ol>
+          <li>Get a Claude API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></li>
+          <li>Enter your API key in Sift's settings page</li>
+          <li>Click "Restructure Folders & Bookmarks" in the Actions tab</li>
+        </ol>
+        <p>Sift creates a new organized folder structure inside a "Sift" folder - your original bookmarks are never modified or deleted.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>Is my data private?</h3>
+        <p>Yes. All bookmark analysis happens locally in your browser. We don't collect, store, or transmit your bookmark data. The only external communication is:</p>
+        <ul>
+          <li><strong>Dead link checking:</strong> HTTP requests to your bookmarked URLs to verify they're working</li>
+          <li><strong>AI features (optional):</strong> Bookmark titles and URLs sent to the Claude API using your own API key</li>
+        </ul>
+        <p>See our <a href="sift-privacy.html">Privacy Policy</a> for complete details.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>Can I undo changes?</h3>
+        <p>Sift does not have a built-in undo feature. However:</p>
+        <ul>
+          <li><strong>Duplicate removal:</strong> Keeps the most recently added bookmark</li>
+          <li><strong>AI categorization:</strong> Creates copies in a new folder - originals are untouched</li>
+          <li><strong>Deletions:</strong> Cannot be undone - review carefully before confirming</li>
+        </ul>
+        <p>We recommend exporting your bookmarks (Chrome Menu > Bookmarks > Bookmark Manager > Export) before making large changes.</p>
+      </div>
+
+      <h2>Troubleshooting</h2>
+
+      <div class="support-card">
+        <h3>The extension isn't showing any bookmarks</h3>
+        <p>Try these steps:</p>
+        <ol>
+          <li>Click the refresh button (↻) in the extension header</li>
+          <li>Close and reopen the extension popup</li>
+          <li>Disable and re-enable the extension in <code>chrome://extensions</code></li>
+          <li>Restart Chrome</li>
+        </ol>
+      </div>
+
+      <div class="support-card">
+        <h3>Dead link check is slow</h3>
+        <p>Dead link checking requires testing each URL, which takes time. The check runs in the background so you can close the popup and continue browsing. You'll receive a notification when it completes.</p>
+        <p>Results are cached, so subsequent checks will skip recently-tested URLs.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>AI categorization failed</h3>
+        <p>Common causes:</p>
+        <ul>
+          <li><strong>Invalid API key:</strong> Verify your Claude API key in settings</li>
+          <li><strong>Insufficient credits:</strong> Check your Anthropic account balance</li>
+          <li><strong>Rate limiting:</strong> Wait a few minutes and try again</li>
+          <li><strong>Network issues:</strong> Check your internet connection</li>
+        </ul>
+      </div>
+
+      <h2>Contact Us</h2>
+
+      <div class="support-card">
+        <h3>Need more help?</h3>
+        <p>If you can't find the answer to your question, you can reach us at:</p>
+        <p><strong>Email:</strong> <a href="mailto:john@pod67.com">john@pod67.com</a></p>
+        <p>We typically respond within 1-2 business days.</p>
+      </div>
+
+      <div class="support-card">
+        <h3>Report a Bug</h3>
+        <p>Found a bug? Please include:</p>
+        <ul>
+          <li>What you were trying to do</li>
+          <li>What happened instead</li>
+          <li>Your Chrome version (<code>chrome://version</code>)</li>
+          <li>Any error messages you saw</li>
+        </ul>
+        <p>Send bug reports to <a href="mailto:john@pod67.com">john@pod67.com</a></p>
+      </div>
+
+      <div class="support-card">
+        <h3>Feature Requests</h3>
+        <p>Have an idea to make Sift better? We'd love to hear it! Email your suggestions to <a href="mailto:john@pod67.com">john@pod67.com</a></p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="sift.html">Sift</a>
+        <a href="sift-support.html">Support</a>
+        <a href="sift-privacy.html">Privacy</a>
+      </div>
+      <p class="footer-copy">&copy; 2025 Pod67. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <style>
+    code {
+      background: var(--surface);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</body>
+</html>
