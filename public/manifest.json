@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sift Bookmark Manager",
   "version": "1.0.0",
-  "description": "AI-powered bookmark manager that helps organize, clean up duplicates, find dead links, and intelligently categorize your bookmarks using Claude AI.",
+  "description": "AI-powered bookmark manager. Helps organize, clean, and intelligently categorize your bookmarks using Claude AI.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
